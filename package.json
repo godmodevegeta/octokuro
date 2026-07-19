@@ -1,0 +1,12 @@
+{
+  "name": "socrates-local-pilot",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "test": "npm --workspace @socrates/api test && npm --workspace @socrates/canvas test",
+    "start:api": "npm --workspace @socrates/api start",
+    "start:canvas": "npm --workspace @socrates/canvas start",
+    "start:verifier": "uvicorn app:app --app-dir apps/verifier --port 8001"
+  }
+}

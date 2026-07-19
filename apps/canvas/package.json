@@ -1,0 +1,43 @@
+{
+  "name": "@socrates/canvas",
+  "version": "0.2.0",
+  "description": "Think with AI on a shared canvas for handwriting, equations, and diagrams",
+  "license": "AGPL-3.0-only",
+  "keywords": ["canvas", "handwriting", "ai", "whiteboard", "math"],
+  "bin": {
+    "socrates": "cli.js"
+  },
+  "files": [
+    "cli.js",
+    "server.js",
+    "codex-cli.js",
+    "public/",
+    "docs/architecture.md",
+    "env.api.example",
+    "env.codex.example",
+    "README.md",
+    "CONTRIBUTING.md",
+    "CONTRIBUTOR-LICENSE-AGREEMENT.md",
+    "LICENSE",
+    "NOTICE",
+    "TRADEMARKS.md",
+    "COMMERCIAL-LICENSE.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/godmodevegeta/octokuro.git"
+  },
+  "homepage": "https://github.com/godmodevegeta/octokuro/tree/main/socrates-main#readme",
+  "bugs": {
+    "url": "https://github.com/godmodevegeta/octokuro/issues"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check cli.js && node --check server.js && node --check codex-cli.js && node --check public/draw.js && node --check public/selection.js && node --check public/app.js && node --test",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=18.17.0" },
+  "dependencies": {
+    "sharp": "^0.34.5"
+  }
+}

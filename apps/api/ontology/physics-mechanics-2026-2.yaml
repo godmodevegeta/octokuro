@@ -1,0 +1,250 @@
+id: physics-mechanics-2026-2
+domain: physics
+version: "2026.2"
+title: Decision-grade Mechanics
+status: draft
+nodes:
+  - node_id: math.vectors.scalar_vector_units.classify
+    domain: mechanics
+    track: mathematical_prerequisite
+    abstraction: intermediate
+    name: Can distinguish scalar and vector quantities with units
+    definition: Student classifies common mechanics quantities, preserves units, and identifies when direction changes a quantity's meaning.
+    evidence_criteria:
+      - { id: quantity_classification, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [classifies_quantities, preserves_units], likelihood_weight: 0.6 }
+      - { id: written_units, type: diagram, required: false, evaluator: rubric_vision_v1, rubrics: [uses_consistent_units], likelihood_weight: 0.2 }
+      - { id: deliberate_work, type: process, required: false, evaluator: process_v1, rubrics: [sustained_attempt], likelihood_weight: 0.2 }
+    prerequisite_edges: []
+    assessment_strategy: { target_probe: classify_mechanics_quantities, follow_up_templates: [explain_direction_changes_quantity, estimate_units_before_calculating], anti_gaming_check: explanation_before_final_answer }
+    decision_map: { high_confidence: proceed_to_coordinate_axes, low_confidence: remediate_scalar_vector_distinction, uncertainty: human_review_required }
+  - node_id: math.dimensions.equation_check
+    domain: mechanics
+    track: mathematical_prerequisite
+    abstraction: intermediate
+    name: Can use dimensional analysis to check a mechanics equation
+    definition: Student compares dimensions on both sides of an equation and uses the mismatch to reject an invalid expression.
+    evidence_criteria:
+      - { id: dimension_reasoning, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [states_dimensions, identifies_match_or_mismatch], likelihood_weight: 0.7 }
+      - { id: unit_work, type: diagram, required: false, evaluator: rubric_vision_v1, rubrics: [writes_units_through_steps], likelihood_weight: 0.3 }
+    prerequisite_edges: [math.vectors.scalar_vector_units.classify]
+    assessment_strategy: { target_probe: check_kinematics_equation_dimensions, follow_up_templates: [repair_invalid_equation, estimate_dimension_without_calculating], anti_gaming_check: units_shown_before_conclusion }
+    decision_map: { high_confidence: proceed_to_motion_models, low_confidence: remediate_units_and_dimensions, uncertainty: human_review_required }
+  - node_id: math.vectors.coordinate_axes.choose
+    domain: mechanics
+    track: representational
+    abstraction: intermediate
+    name: Can choose axes that simplify a mechanics representation
+    definition: Student selects and labels coordinate axes aligned to the physical situation and explains the choice.
+    evidence_criteria:
+      - { id: axes_drawn, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [axes_labeled, axes_aligned_to_situation], likelihood_weight: 0.65 }
+      - { id: axes_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [explains_axis_choice], likelihood_weight: 0.35 }
+    prerequisite_edges: [math.vectors.scalar_vector_units.classify]
+    assessment_strategy: { target_probe: choose_axes_for_incline, follow_up_templates: [rotate_axes_for_new_situation, explain_axis_tradeoff], anti_gaming_check: diagram_before_equations }
+    decision_map: { high_confidence: proceed_to_motion_graphs, low_confidence: remediate_vector_direction, uncertainty: human_review_required }
+  - node_id: mechanics.kinematics.motion_graph.interpret
+    domain: mechanics
+    track: representational
+    abstraction: intermediate
+    name: Can infer motion from position, velocity, and acceleration graphs
+    definition: Student connects graph features to direction, speed, and acceleration without treating graph height as a physical location in every graph.
+    evidence_criteria:
+      - { id: graph_annotations, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [identifies_slope, identifies_signed_area_or_curvature], likelihood_weight: 0.6 }
+      - { id: motion_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [connects_graph_to_motion], likelihood_weight: 0.4 }
+    prerequisite_edges: [math.vectors.coordinate_axes.choose]
+    assessment_strategy: { target_probe: interpret_motion_graph, follow_up_templates: [match_graph_to_story, sketch_graph_for_story], anti_gaming_check: interpretation_before_formula }
+    decision_map: { high_confidence: proceed_to_one_dimensional_modeling, low_confidence: remediate_graph_representations, uncertainty: human_review_required }
+  - node_id: mechanics.kinematics.one_dimensional.model
+    domain: mechanics
+    track: procedural
+    abstraction: intermediate
+    name: Can model one-dimensional motion with a consistent representation
+    definition: Student defines a sign convention, selects a valid constant-acceleration relationship, and checks the result against the motion description.
+    evidence_criteria:
+      - { id: model_setup, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [states_sign_convention, selects_valid_relationship], likelihood_weight: 0.5 }
+      - { id: result_check, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [checks_direction_and_units], likelihood_weight: 0.35 }
+      - { id: work_sequence, type: process, required: false, evaluator: process_v1, rubrics: [representation_before_substitution], likelihood_weight: 0.15 }
+    prerequisite_edges: [mechanics.kinematics.motion_graph.interpret, math.dimensions.equation_check]
+    assessment_strategy: { target_probe: model_constant_acceleration, follow_up_templates: [change_sign_convention, estimate_before_calculating], anti_gaming_check: representation_before_equations }
+    decision_map: { high_confidence: proceed_to_projectile_resolution, low_confidence: remediate_motion_model_setup, uncertainty: human_review_required }
+  - node_id: mechanics.kinematics.projectile.resolve
+    domain: mechanics
+    track: procedural
+    abstraction: intermediate
+    name: Can resolve projectile motion into independent components
+    definition: Student decomposes the initial velocity, treats horizontal and vertical motion independently, and recombines the result appropriately.
+    evidence_criteria:
+      - { id: component_diagram, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [resolves_initial_velocity, labels_components], likelihood_weight: 0.55 }
+      - { id: independence_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [states_component_independence], likelihood_weight: 0.45 }
+    prerequisite_edges: [mechanics.kinematics.one_dimensional.model, math.vectors.coordinate_axes.choose]
+    assessment_strategy: { target_probe: resolve_projectile_motion, follow_up_templates: [change_launch_angle, estimate_range_change], anti_gaming_check: component_diagram_before_equations }
+    decision_map: { high_confidence: proceed_to_circular_motion, low_confidence: remediate_component_resolution, uncertainty: human_review_required }
+  - node_id: math.calculus.motion.derivative_integral
+    domain: mechanics
+    track: mathematical_prerequisite
+    abstraction: intermediate
+    name: Can connect derivatives and integrals to motion quantities
+    definition: Student relates position, velocity, and acceleration through rates of change and accumulated change.
+    evidence_criteria:
+      - { id: calculus_relationship, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [states_derivative_relationship, states_integral_relationship], likelihood_weight: 0.7 }
+      - { id: graph_work, type: diagram, required: false, evaluator: rubric_vision_v1, rubrics: [uses_graph_area_or_slope_correctly], likelihood_weight: 0.3 }
+    prerequisite_edges: [mechanics.kinematics.motion_graph.interpret]
+    assessment_strategy: { target_probe: connect_motion_graph_calculus, follow_up_templates: [interpret_area_under_curve, explain_rate_change], anti_gaming_check: relationship_before_symbolic_manipulation }
+    decision_map: { high_confidence: proceed_to_advanced_motion, low_confidence: remediate_rates_and_accumulation, uncertainty: human_review_required }
+  - node_id: mechanics.fbd.complete_diagram
+    domain: mechanics
+    track: representational
+    abstraction: intermediate
+    name: Can draw a complete free-body diagram for one object
+    definition: Student isolates one object, includes all external forces, and excludes forces exerted by that object on others.
+    evidence_criteria:
+      - { id: force_inventory, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [isolates_object, includes_external_forces, excludes_nonforces], likelihood_weight: 0.75 }
+      - { id: force_justification, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [justifies_force_sources], likelihood_weight: 0.25 }
+    prerequisite_edges: [math.vectors.scalar_vector_units.classify]
+    assessment_strategy: { target_probe: draw_fbd_single_object, follow_up_templates: [remove_one_interaction, explain_force_source], anti_gaming_check: student_must_draw_before_equations }
+    decision_map: { high_confidence: proceed_to_equilibrium_and_newton_laws, low_confidence: remediate_force_inventory, uncertainty: human_review_required }
+  - node_id: mechanics.forces.equilibrium.net_force
+    domain: mechanics
+    track: conceptual
+    abstraction: intermediate
+    name: Can relate zero net force to motion without assuming rest
+    definition: Student explains that zero net force means zero acceleration and distinguishes equilibrium from zero velocity.
+    evidence_criteria:
+      - { id: equilibrium_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [states_zero_net_force_zero_acceleration, distinguishes_constant_velocity], likelihood_weight: 0.75 }
+      - { id: supporting_fbd, type: diagram, required: false, evaluator: rubric_vision_v1, rubrics: [balanced_force_representation], likelihood_weight: 0.25 }
+    prerequisite_edges: [mechanics.fbd.complete_diagram]
+    assessment_strategy: { target_probe: explain_equilibrium_motion, follow_up_templates: [modify_velocity_case, identify_non_equilibrium_case], anti_gaming_check: explanation_before_equation }
+    decision_map: { high_confidence: proceed_to_newtons_second_law, low_confidence: remediate_net_force_and_acceleration, uncertainty: human_review_required }
+  - node_id: mechanics.dynamics.newtons_second_law.model
+    domain: mechanics
+    track: procedural
+    abstraction: intermediate
+    name: Can build a Newton's second-law model from a free-body diagram
+    definition: Student writes a net-force equation from a valid diagram with consistent signs and solves for the requested dynamical quantity.
+    evidence_criteria:
+      - { id: fbd_to_equation, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [equation_matches_fbd, uses_consistent_signs], likelihood_weight: 0.55 }
+      - { id: model_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [explains_net_force_relationship], likelihood_weight: 0.3 }
+      - { id: setup_sequence, type: process, required: false, evaluator: process_v1, rubrics: [diagram_before_equations], likelihood_weight: 0.15 }
+    prerequisite_edges: [mechanics.fbd.complete_diagram, mechanics.forces.equilibrium.net_force, mechanics.kinematics.one_dimensional.model]
+    assessment_strategy: { target_probe: model_cart_with_net_force, follow_up_templates: [change_force_direction, estimate_acceleration], anti_gaming_check: student_must_draw_before_equations }
+    decision_map: { high_confidence: proceed_to_connected_and_inclined_systems, low_confidence: remediate_fbd_to_equation, uncertainty: human_review_required }
+  - node_id: mechanics.forces.action_reaction.identify
+    domain: mechanics
+    track: conceptual
+    abstraction: intermediate
+    name: Can identify an action-reaction pair across two objects
+    definition: Student identifies equal and opposite interaction forces on different objects and does not confuse them with balanced forces on one object.
+    evidence_criteria:
+      - { id: pair_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [identifies_two_objects, states_equal_opposite_pair, distinguishes_equilibrium], likelihood_weight: 0.7 }
+      - { id: interaction_diagram, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [draws_forces_on_separate_objects], likelihood_weight: 0.3 }
+    prerequisite_edges: [mechanics.fbd.complete_diagram]
+    assessment_strategy: { target_probe: identify_action_reaction_pair, follow_up_templates: [compare_balanced_forces, switch_interacting_objects], anti_gaming_check: separate_objects_before_labeling }
+    decision_map: { high_confidence: proceed_to_interaction_models, low_confidence: remediate_force_pairs, uncertainty: human_review_required }
+  - node_id: mechanics.fbd.normal_force.inclined
+    domain: mechanics
+    track: representational
+    abstraction: intermediate
+    name: Can draw the correct normal force on an inclined plane
+    definition: Student identifies the surface contact, draws the normal force perpendicular to the surface rather than vertical, and distinguishes it from weight.
+    evidence_criteria:
+      - { id: normal_force_geometry, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [force_vector_originates_at_contact_point, direction_is_perpendicular_to_surface, not_collinear_with_gravity], likelihood_weight: 0.65 }
+      - { id: normal_force_explanation, type: explanation, required: false, evaluator: rubric_vision_v1, rubrics: [explains_why_normal_is_not_equal_to_weight], likelihood_weight: 0.2 }
+      - { id: diagram_first, type: process, required: true, evaluator: process_v1, rubrics: [diagram_before_equations], likelihood_weight: 0.15 }
+    prerequisite_edges: [mechanics.fbd.complete_diagram, math.vectors.coordinate_axes.choose]
+    assessment_strategy: { target_probe: draw_fbd_inclined_plane, follow_up_templates: [modify_for_frictionless, explain_why_direction_changed, estimate_without_calculating], anti_gaming_check: student_must_draw_before_equations }
+    decision_map: { high_confidence: proceed_to_inclined_plane_dynamics, low_confidence: remediate_contact_force_basics, uncertainty: human_review_required }
+  - node_id: mechanics.dynamics.tension.connected_bodies
+    domain: mechanics
+    track: procedural
+    abstraction: intermediate
+    name: Can model tension in a connected-body system
+    definition: Student draws separate diagrams, applies a shared acceleration constraint, and connects the equations without assigning unequal ideal-string tension.
+    evidence_criteria:
+      - { id: separate_diagrams, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [separates_objects, labels_tension_consistently], likelihood_weight: 0.55 }
+      - { id: constraint_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [states_shared_acceleration_constraint], likelihood_weight: 0.45 }
+    prerequisite_edges: [mechanics.dynamics.newtons_second_law.model, mechanics.forces.action_reaction.identify]
+    assessment_strategy: { target_probe: model_connected_carts, follow_up_templates: [change_mass_distribution, explain_tension_constraint], anti_gaming_check: separate_diagrams_before_system_equation }
+    decision_map: { high_confidence: proceed_to_complex_dynamics, low_confidence: remediate_connected_body_models, uncertainty: human_review_required }
+  - node_id: mechanics.dynamics.inclined_plane.components
+    domain: mechanics
+    track: procedural
+    abstraction: intermediate
+    name: Can resolve forces and model dynamics on an inclined plane
+    definition: Student chooses axes parallel and perpendicular to the plane, resolves weight correctly, and writes force equations for the chosen axes.
+    evidence_criteria:
+      - { id: resolved_fbd, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [axes_parallel_perpendicular, resolves_weight_correctly], likelihood_weight: 0.6 }
+      - { id: dynamics_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [connects_components_to_force_equations], likelihood_weight: 0.4 }
+    prerequisite_edges: [mechanics.fbd.normal_force.inclined, mechanics.dynamics.newtons_second_law.model]
+    assessment_strategy: { target_probe: model_inclined_plane_dynamics, follow_up_templates: [add_friction, change_slope_angle], anti_gaming_check: resolved_diagram_before_equations }
+    decision_map: { high_confidence: proceed_to_energy_and_circular_dynamics, low_confidence: remediate_incline_resolution, uncertainty: human_review_required }
+  - node_id: mechanics.circular_motion.centripetal_force
+    domain: mechanics
+    track: conceptual
+    abstraction: intermediate
+    name: Can explain centripetal acceleration as a net-force direction
+    definition: Student identifies inward acceleration and net force without treating centripetal force as an additional physical interaction.
+    evidence_criteria:
+      - { id: radial_representation, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [shows_inward_acceleration, identifies_real_force_source], likelihood_weight: 0.5 }
+      - { id: centripetal_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [distinguishes_net_force_from_named_force], likelihood_weight: 0.5 }
+    prerequisite_edges: [mechanics.dynamics.newtons_second_law.model, mechanics.kinematics.projectile.resolve]
+    assessment_strategy: { target_probe: explain_circular_motion_force, follow_up_templates: [remove_force_source, compare_speed_change], anti_gaming_check: radial_diagram_before_formula }
+    decision_map: { high_confidence: proceed_to_advanced_mechanics, low_confidence: remediate_radial_net_force, uncertainty: human_review_required }
+  - node_id: mechanics.energy.work_energy.transfer
+    domain: mechanics
+    track: conceptual
+    abstraction: intermediate
+    name: Can relate work to energy transfer in a mechanics system
+    definition: Student identifies the system, recognizes force displacement alignment, and explains the associated energy transfer.
+    evidence_criteria:
+      - { id: system_representation, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [identifies_system, indicates_force_and_displacement], likelihood_weight: 0.5 }
+      - { id: energy_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [connects_work_and_energy_change], likelihood_weight: 0.5 }
+    prerequisite_edges: [mechanics.dynamics.newtons_second_law.model]
+    assessment_strategy: { target_probe: explain_work_energy_transfer, follow_up_templates: [change_force_angle, estimate_energy_change], anti_gaming_check: system_definition_before_equation }
+    decision_map: { high_confidence: proceed_to_conservative_energy, low_confidence: remediate_work_energy_meaning, uncertainty: human_review_required }
+  - node_id: mechanics.energy.conservative_energy
+    domain: mechanics
+    track: conceptual
+    abstraction: intermediate
+    name: Can apply conservation of mechanical energy with stated assumptions
+    definition: Student distinguishes conservative and non-conservative work and states when mechanical energy is conserved.
+    evidence_criteria:
+      - { id: energy_accounting, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [identifies_energy_forms, identifies_external_or_nonconservative_work], likelihood_weight: 0.45 }
+      - { id: conservation_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [states_conservation_condition], likelihood_weight: 0.55 }
+    prerequisite_edges: [mechanics.energy.work_energy.transfer]
+    assessment_strategy: { target_probe: decide_mechanical_energy_conservation, follow_up_templates: [add_friction, compare_system_boundaries], anti_gaming_check: assumptions_before_substitution }
+    decision_map: { high_confidence: proceed_to_advanced_energy_models, low_confidence: remediate_conservation_assumptions, uncertainty: human_review_required }
+  - node_id: mechanics.momentum.impulse.change
+    domain: mechanics
+    track: conceptual
+    abstraction: intermediate
+    name: Can relate impulse to change in momentum
+    definition: Student connects net force over time to a vector momentum change and uses direction consistently.
+    evidence_criteria:
+      - { id: impulse_representation, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [shows_force_time_or_vector_change, labels_direction], likelihood_weight: 0.45 }
+      - { id: impulse_explanation, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [connects_impulse_and_momentum_change], likelihood_weight: 0.55 }
+    prerequisite_edges: [mechanics.dynamics.newtons_second_law.model]
+    assessment_strategy: { target_probe: explain_impulse_momentum_change, follow_up_templates: [change_collision_time, estimate_direction_change], anti_gaming_check: vector_representation_before_equation }
+    decision_map: { high_confidence: proceed_to_collision_conservation, low_confidence: remediate_impulse_meaning, uncertainty: human_review_required }
+  - node_id: mechanics.momentum.collision.conservation
+    domain: mechanics
+    track: procedural
+    abstraction: intermediate
+    name: Can model a collision using momentum conservation
+    definition: Student defines the interacting system, states the external impulse assumption, and writes momentum conservation with consistent directions.
+    evidence_criteria:
+      - { id: collision_setup, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [defines_system, labels_initial_final_momenta], likelihood_weight: 0.55 }
+      - { id: conservation_reasoning, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [states_external_impulse_assumption], likelihood_weight: 0.45 }
+    prerequisite_edges: [mechanics.momentum.impulse.change]
+    assessment_strategy: { target_probe: model_one_dimensional_collision, follow_up_templates: [introduce_external_impulse, compare_elastic_inelastic], anti_gaming_check: system_before_conservation_equation }
+    decision_map: { high_confidence: proceed_to_advanced_momentum_models, low_confidence: remediate_collision_system_choice, uncertainty: human_review_required }
+  - node_id: mechanics.rotation.torque.angular_acceleration
+    domain: mechanics
+    track: procedural
+    abstraction: intermediate
+    name: Can connect torque, angular acceleration, and rotational inertia
+    definition: Student identifies lever arms and force directions, calculates or compares torque, and relates net torque to angular acceleration.
+    evidence_criteria:
+      - { id: torque_diagram, type: diagram, required: true, evaluator: rubric_vision_v1, rubrics: [identifies_pivot, identifies_lever_arm, identifies_force_direction], likelihood_weight: 0.55 }
+      - { id: rotational_reasoning, type: explanation, required: true, evaluator: rubric_vision_v1, rubrics: [connects_net_torque_and_angular_acceleration], likelihood_weight: 0.45 }
+    prerequisite_edges: [math.calculus.motion.derivative_integral, mechanics.circular_motion.centripetal_force, mechanics.energy.conservative_energy]
+    assessment_strategy: { target_probe: model_rotational_acceleration, follow_up_templates: [move_force_location, compare_rotational_inertia], anti_gaming_check: pivot_diagram_before_equation }
+    decision_map: { high_confidence: proceed_to_advanced_mechanics, low_confidence: remediate_torque_representation, uncertainty: human_review_required }
