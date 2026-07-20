@@ -128,6 +128,7 @@ npm run check
 ```
 
 For implementation details, see the [architecture notes](docs/architecture.md).
+For the complete implementation-accurate Canvas capability inventory, see [FEATURES.md](FEATURES.md).
 
 ## Build it with us
 

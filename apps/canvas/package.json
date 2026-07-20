@@ -12,6 +12,7 @@
     "server.js",
     "codex-cli.js",
     "public/",
+    "FEATURES.md",
     "docs/architecture.md",
     "env.api.example",
     "env.codex.example",
