@@ -1,5 +1,5 @@
 <h1 align="center">
-  <strong>Socrates</strong>
+  <strong>Socrates Canvas</strong>
 </h1>
 
 <p align="center"><strong>Question deeply beyond the chat box.</strong></p>
