@@ -219,11 +219,31 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
 #viewport { position: relative; height: min(72vh, 900px); min-height: 440px; overflow: hidden; border: 1px solid #17110d; border-radius: 8px; background: var(--outside); touch-action: none; box-shadow: inset 0 0 35px rgba(0,0,0,.45); }
 #screen { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
 #screen.cursor-crosshair { cursor: crosshair; }
+#screen.cursor-text { cursor: text; }
 #screen.cursor-grab { cursor: grab; }
 #screen.cursor-grabbing { cursor: grabbing; }
 #screen.cursor-nwse-resize { cursor: nwse-resize; }
 #screen.cursor-ew-resize { cursor: ew-resize; }
 #screen.cursor-ns-resize { cursor: ns-resize; }
+.text-editor { position: absolute; z-index: 8; top: 50%; left: 50%; width: min(360px, calc(100% - 24px)); padding: 8px; color: var(--ink); border: 1px solid color-mix(in srgb, var(--gold) 74%, var(--line)); border-radius: 9px; background: color-mix(in srgb, var(--panel-raised) 94%, transparent); box-shadow: 0 12px 30px #0006; transform: translate(-50%, -50%); backdrop-filter: blur(10px); }
+.text-editor[data-anchor="top-left"] { top: 10px; left: 10px; transform: none; }
+.text-editor[data-anchor="top-center"] { top: 10px; left: 50%; transform: translateX(-50%); }
+.text-editor[data-anchor="top-right"] { top: 10px; right: 10px; left: auto; transform: none; }
+.text-editor[data-anchor="middle-left"] { top: 50%; left: 10px; transform: translateY(-50%); }
+.text-editor[data-anchor="middle-right"] { top: 50%; right: 10px; left: auto; transform: translateY(-50%); }
+.text-editor[data-anchor="bottom-left"] { bottom: 10px; top: auto; left: 10px; transform: none; }
+.text-editor[data-anchor="bottom-center"] { bottom: 10px; top: auto; left: 50%; transform: translateX(-50%); }
+.text-editor[data-anchor="bottom-right"] { right: 10px; bottom: 10px; top: auto; left: auto; transform: none; }
+.text-editor[hidden] { display: none; }
+.text-editor-header, .text-editor-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0; }
+.text-editor-kinds { display: inline-flex; padding: 2px; border: 1px solid var(--line); border-radius: 6px; background: color-mix(in srgb, var(--night) 52%, transparent); }
+.text-editor button { min-height: 27px; padding: 4px 8px; color: var(--muted); border: 0; border-radius: 4px; background: transparent; font: 700 .68rem/1 system-ui, sans-serif; cursor: pointer; }
+.text-editor button:hover, .text-editor button:focus-visible { color: var(--ink); background: color-mix(in srgb, var(--gold) 16%, transparent); outline: none; }
+.text-editor .text-editor-kinds button.active, .text-editor #textEditorCommit { color: #241a14; background: linear-gradient(180deg, var(--gold-bright), var(--gold)); }
+.text-editor-close { width: 27px; padding: 0 !important; color: var(--muted) !important; font-size: 1.05rem !important; }
+#textEditorInput { display: block; width: 100%; min-height: 84px; margin: 8px 0; resize: vertical; padding: 8px; color: var(--ink); border: 1px solid var(--line); border-radius: 6px; outline: 0; background: color-mix(in srgb, var(--night) 62%, transparent); font: .86rem/1.45 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+#textEditorInput:focus { border-color: var(--gold-bright); box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 28%, transparent); }
+.text-editor-footer small { max-width: 200px; color: var(--muted); font: .62rem/1.3 system-ui, sans-serif; }
 #tip { position: absolute; right: 12px; bottom: 11px; z-index: 3; max-width: calc(100% - 24px); padding: 5px 8px; pointer-events: none; color: transparent; border: 1px solid transparent; border-radius: 5px; background: transparent; opacity: .06; font-size: .7rem; letter-spacing: .025em; transition: opacity .2s ease, color .2s ease, background .2s ease, border-color .2s ease; }
 #viewport.is-navigating #tip { color: #f1e5c6; border-color: rgba(198, 163, 91, .38); background: rgba(12, 10, 17, .88); opacity: 1; backdrop-filter: blur(8px); }
 
@@ -346,8 +366,9 @@ body[data-theme="research"] footer, body[data-theme="research"] #coords { color:
   .color-orb-control { transform: scale(.92); }
   .auto-delay-popover { left: 0; transform: none; }
   input[type="range"] { width: 50px; }
-  #penSizeValue { display: none; }
+  #toolSizeValue { display: none; }
   #viewport { height: 67vh; min-height: 380px; }
+  .text-editor { width: min(330px, calc(100% - 18px)); }
   #tip { left: 10px; right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ai-embodiment { top: 8px; right: 9px; transform: scale(.9); transform-origin: top right; }
   footer span:last-child { display: none; }

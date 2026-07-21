@@ -13,6 +13,7 @@ Put a question, equation, diagram, or half-formed idea anywhere on the canvas an
 - Get answers, hints, explanations, continuations, formulas, plots, and diagrams directly on the canvas.
 - Move, resize, accept, or discard every AI draft before it becomes part of your work.
 - Draw naturally with a stylus or mouse, then pan and zoom across a sparse `20,000 x 20,000` canvas.
+- Add typed plain text or LaTeX directly to the canvas when handwriting is not the right tool.
 - Draw a freehand lasso around confirmed ink to move, resize, or recolor it locally; accepting or cancelling a selection never triggers an AI request.
 - Choose Arcane, Sci-fi, or Research mode to match the kind of problem you are exploring.
 - Save lightweight snapshots locally in your browser. Starting a new canvas can overwrite the current snapshot, save a new copy, or continue without saving; unconfirmed AI drafts are never included.

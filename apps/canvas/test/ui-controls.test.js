@@ -63,6 +63,72 @@ test("New canvas and Auto AI controls have English and Chinese copy", () => {
   }
 });
 
+test("the size control switches between separate pen and eraser settings", () => {
+  const html = read("public/index.html"), app = read("public/app.js"), zh = read("public/locales/zh.js");
+  assert.match(html, /id="toolSizeLabel"[^>]*data-i18n="penSize"/);
+  assert.match(html, /id="toolSize"[^>]*min="2"[^>]*max="16"[^>]*data-i18n-aria="penSize"/);
+  assert.match(html, /id="toolSizeValue">4 px/);
+  for (const key of ["penSize", "eraserSize"]) {
+    assert.match(app, new RegExp(`${key}:`));
+    assert.match(zh, new RegExp(`${key}:`));
+  }
+  const update = functionSource(app, "updateToolSizeControl"), input = app.slice(app.indexOf('document.querySelector("#toolSize").oninput'), app.indexOf('document.querySelector("#aiFont").onchange'));
+  assert.match(update, /state\.mode === "eraser" \? TOOL_SIZE\.eraser : TOOL_SIZE\.pen/);
+  assert.match(app, /pen: \{ labelKey: "penSize", stateKey: "pen", minimum: 2, maximum: 16 \}/);
+  assert.match(app, /eraser: \{ labelKey: "eraserSize", stateKey: "eraser", minimum: 8, maximum: 120 \}/);
+  assert.match(update, /input\.min = String\(settings\.minimum\)/);
+  assert.match(update, /input\.max = String\(settings\.maximum\)/);
+  assert.match(update, /input\.setAttribute\("aria-label", t\(settings\.labelKey\)\)/);
+  assert.match(input, /state\[settings\.stateKey\] = \+e\.target\.value/);
+  assert.match(app, /state\.mode = b\.dataset\.mode;[\s\S]*?updateToolSizeControl\(\)/);
+});
+
+test("Text mode provides accessible plain-text and LaTeX editors", () => {
+  const html = read("public/index.html"), app = read("public/app.js"), zh = read("public/locales/zh.js"), css = read("public/style.css");
+  assert.match(html, /data-mode="text"/);
+  assert.match(html, /id="textEditor"/);
+  assert.match(html, /id="textEditorInput"/);
+  assert.match(html, /data-text-kind="text"/);
+  assert.match(html, /data-text-kind="latex"/);
+  assert.match(html, /id="textEditorCommit"/);
+  assert.match(html, /id="textEditorCancel"/);
+  for (const key of ["text", "textEditor", "textMode", "plainText", "latex", "textHint", "latexHint", "placeText", "cancelText", "textPlaced"]) {
+    assert.match(app, new RegExp(`${key}:`));
+    assert.match(zh, new RegExp(`${key}:`));
+  }
+  assert.match(css, /\.text-editor\[hidden\]\s*\{\s*display:\s*none/);
+  assert.match(css, /#screen\.cursor-text\s*\{\s*cursor:\s*text/);
+  assert.match(app, /function positionTextEditor\(point\)/);
+  assert.match(app, /textEditor\.dataset\.anchor/);
+  assert.match(css, /\.text-editor\[data-anchor="bottom-right"\]/);
+});
+
+test("typed Canvas content uses existing text and formula rendering, history, and Auto AI paths", () => {
+  const app = read("public/app.js");
+  const commit = functionSource(app, "commitTextEditor");
+  assert.match(commit, /textImage\(content, fontSize, state\.inkColor, maxWidth, 1\.35\)/);
+  assert.match(commit, /formulaImage\(content, fontSize, state\.inkColor\)/);
+  assert.match(commit, /blitSized\(image, x, y, width, height\)/);
+  assert.match(commit, /mergeDirty\(x, y, 0\)/);
+  assert.match(commit, /state\.autoEligible = true/);
+  assert.match(commit, /if \(!isAssessmentMode\(\)\) schedule\(\)/);
+  assert.match(commit, /save\(\)/);
+  assert.match(app, /event\.key === "Enter" && \(event\.ctrlKey \|\| event\.metaKey\)/);
+  assert.match(app, /event\.key === "Escape"/);
+  assert.match(app, /compositionstart/);
+  assert.match(app, /compositionend/);
+});
+
+test("assessment mode suppresses automatic and manual Canvas AI while retaining text mode", () => {
+  const app = read("public/app.js"), assessment = read("public/assessment.js"), html = read("public/index.html");
+  assert.match(html, /data-mode="text"/);
+  assert.match(functionSource(app, "launchAutomaticAI"), /isAssessmentMode\(\)/);
+  assert.match(functionSource(app, "schedule"), /isAssessmentMode\(\)/);
+  assert.match(functionSource(app, "invokeAIAction"), /if \(isAssessmentMode\(\)\) return/);
+  assert.match(app, /window\.addEventListener\("socrates-assessment-mode", suppressAssessmentAI\)/);
+  assert.match(assessment, /window\.dispatchEvent\(new Event\("socrates-assessment-mode"\)\)/);
+});
+
 test("eraser strokes never enter the AI recognition batch", () => {
   const app = read("public/app.js");
   assert.match(app, /const shouldRequest = !d\.erase/);

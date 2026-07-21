@@ -18,7 +18,10 @@
     debugRequest = document.querySelector("#debugRequest"),
     embodiment = document.querySelector("#aiEmbodiment"),
     aiOrb = document.querySelector("#aiOrb"),
-    aiRadial = document.querySelector("#aiRadial");
+    aiRadial = document.querySelector("#aiRadial"),
+    textEditor = document.querySelector("#textEditor"),
+    textEditorInput = document.querySelector("#textEditorInput"),
+    textEditorHint = document.querySelector("#textEditorHint");
   const ZH = window.SOCRATES_LOCALES?.zh || {};
   const DRAW = window.SOCRATES_DRAW;
   const SELECT = window.SOCRATES_SELECTION;
@@ -42,9 +45,20 @@
       guideResearch: "Einstein scientific mentor",
       boardTools: "Board tools",
       pen: "Pen",
+      text: "Text",
+      textEditor: "Canvas text editor",
+      textMode: "Text mode",
+      plainText: "Text",
+      latex: "LaTeX",
+      textHint: "Type, then press Ctrl or Cmd + Enter to place.",
+      latexHint: "Enter LaTeX, then press Ctrl or Cmd + Enter to place.",
+      placeText: "Place text",
+      cancelText: "Cancel text",
+      textPlaced: "Text placed",
       eraser: "Eraser",
       select: "Lasso select",
       penSize: "Pen size",
+      eraserSize: "Eraser size",
       autoAI: "Auto AI",
       autoEnabled: "Auto AI ({delay}s)",
       autoDisabled: "Manual AI",
@@ -185,6 +199,7 @@
       pendingGesture: null,
       selection: null,
       selectionGesture: null,
+      textEditor: null,
       hotspotTrail: [],
       auto: initialAutoEnabled,
       timer: 0,
@@ -220,6 +235,10 @@
       radialSuppressClickUntil: 0,
       statusKey: "ready",
     };
+  const TOOL_SIZE = {
+    pen: { labelKey: "penSize", stateKey: "pen", minimum: 2, maximum: 16 },
+    eraser: { labelKey: "eraserSize", stateKey: "eraser", minimum: 8, maximum: 120 },
+  };
   const AI_CANCELLED = "AI_CANCELLED";
   const AI_REJECTED = "AI_REJECTED";
   const AI_SUPERSEDED = "AI_SUPERSEDED";
@@ -243,6 +262,21 @@
     document.querySelector("#autoLabel").textContent = state.auto ? t("autoEnabled").replace("{delay}", autoDelayText()) : t("autoDisabled");
     range.value = String(state.autoDelayMs / 1000);
     value.textContent = `${autoDelayText()} s`;
+  }
+  function updateToolSizeControl() {
+    const settings = state.mode === "eraser" ? TOOL_SIZE.eraser : TOOL_SIZE.pen,
+      label = document.querySelector("#toolSizeLabel"),
+      input = document.querySelector("#toolSize"),
+      output = document.querySelector("#toolSizeValue"),
+      value = state[settings.stateKey];
+    label.dataset.i18n = settings.labelKey;
+    label.textContent = t(settings.labelKey);
+    input.min = String(settings.minimum);
+    input.max = String(settings.maximum);
+    input.value = String(value);
+    input.dataset.i18nAria = settings.labelKey;
+    input.setAttribute("aria-label", t(settings.labelKey));
+    output.textContent = `${value} px`;
   }
   function hideAutoDelayControl() {
     clearTimeout(state.autoPopoverTimer);
@@ -292,6 +326,8 @@
     updateThemeCopy();
     updateEmbodimentLabel();
     updateGridButton();
+    updateToolSizeControl();
+    updateTextEditorUi();
     renderSnapshotList();
     updateNewCanvasDialog();
     if (state.statusKey) status.textContent = t(state.statusKey);
@@ -350,6 +386,29 @@
     embodiment.classList.toggle("working", state.busy);
     embodiment.setAttribute("aria-busy", String(state.busy));
   }
+  function isAssessmentMode() {
+    return document.body.classList.contains("assessment-mode");
+  }
+  function suppressAssessmentAI() {
+    clearTimeout(state.timer);
+    state.timer = 0;
+    state.recognitionGeneration++;
+    state.hotspotTrail = [];
+    state.dirty = null;
+    state.autoEligible = false;
+    state.lastUserBox = null;
+    const active = state.activeAI;
+    if (active && !active.superseded) {
+      active.superseded = true;
+      active.dirtyRestored = true;
+      active.controller.abort();
+      if (state.activeAI === active) {
+        state.activeAI = null;
+        setBusy(false);
+      }
+    }
+    discardPendingForNewAI();
+  }
   function setNavigating(value) {
     clearTimeout(state.navigationTimer);
     if (value) view.classList.add("is-navigating");
@@ -360,6 +419,11 @@
     state.navigationTimer = setTimeout(() => setNavigating(false), 700);
   }
   function invokeAIAction(action) {
+    if (isAssessmentMode()) return;
+    if (state.textEditor) {
+      void commitTextEditor().then(() => invokeAIAction(action));
+      return;
+    }
     if (state.pending) {
       setStatusKey("pendingConfirm");
       return;
@@ -535,7 +599,7 @@
     };
   }
   function setCanvasCursor(cursor) {
-    screen.classList.remove("cursor-crosshair", "cursor-grab", "cursor-grabbing", "cursor-nwse-resize", "cursor-ew-resize", "cursor-ns-resize");
+    screen.classList.remove("cursor-crosshair", "cursor-text", "cursor-grab", "cursor-grabbing", "cursor-nwse-resize", "cursor-ew-resize", "cursor-ns-resize");
     screen.classList.add(`cursor-${cursor}`);
   }
   function beginTouchGesture() {
@@ -585,6 +649,94 @@
   }
   function valid(p) {
     return p.x >= 0 && p.x <= SIZE && p.y >= 0 && p.y <= SIZE;
+  }
+  function updateTextEditorUi() {
+    const editor = state.textEditor;
+    if (!editor) return;
+    textEditor.dataset.kind = editor.kind;
+    textEditor.querySelectorAll("[data-text-kind]").forEach((button) => {
+      const active = button.dataset.textKind === editor.kind;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    const key = editor.kind === "latex" ? "latexHint" : "textHint";
+    textEditorInput.placeholder = t(key);
+    textEditorHint.textContent = t(key);
+  }
+  function positionTextEditor(point) {
+    const bounds = view.getBoundingClientRect(),
+      x = state.panX + point.x * state.scale,
+      y = state.panY + point.y * state.scale,
+      horizontal = x < bounds.width / 3 ? "left" : x > bounds.width * 2 / 3 ? "right" : "center",
+      vertical = y < bounds.height / 3 ? "top" : y > bounds.height * 2 / 3 ? "bottom" : "middle";
+    textEditor.dataset.anchor = `${vertical}-${horizontal}`;
+  }
+  function openTextEditor(point) {
+    if (!valid(point)) {
+      setStatusKey("outsideCanvas");
+      return;
+    }
+    if (state.pending) {
+      setStatusKey("pendingConfirm");
+      return;
+    }
+    if (state.selection) commitSelection();
+    state.textEditor = { x: point.x, y: point.y, kind: "text", composing: false, committing: false };
+    textEditorInput.value = "";
+    textEditor.querySelectorAll("button, textarea").forEach((control) => (control.disabled = false));
+    textEditor.hidden = false;
+    textEditor.setAttribute("aria-hidden", "false");
+    updateTextEditorUi();
+    positionTextEditor(point);
+    requestAnimationFrame(() => {
+      textEditorInput.focus();
+    });
+  }
+  function cancelTextEditor() {
+    if (!state.textEditor || state.textEditor.committing) return false;
+    state.textEditor = null;
+    textEditor.hidden = true;
+    textEditor.setAttribute("aria-hidden", "true");
+    textEditorInput.value = "";
+    return true;
+  }
+  async function commitTextEditor() {
+    const editor = state.textEditor;
+    if (!editor || editor.committing) return false;
+    const content = textEditorInput.value.trim();
+    if (!content) return cancelTextEditor();
+    editor.committing = true;
+    textEditor.querySelectorAll("button, textarea").forEach((control) => (control.disabled = true));
+    try {
+      const fontSize = editor.kind === "latex" ? matchedFontSize(180) : matchedTextFontSize(180, content),
+        x = Math.max(0, Math.min(editor.x, SIZE - fontSize)),
+        y = Math.max(0, Math.min(editor.y, SIZE - fontSize)),
+        maxWidth = Math.max(fontSize, Math.min(SIZE - x, Math.max(900, Math.min(4000, Math.round(460 / state.scale))))),
+        image = editor.kind === "latex" ? await formulaImage(content, fontSize, state.inkColor) : textImage(content, fontSize, state.inkColor, maxWidth, 1.35),
+        width = Math.min(SIZE - x, image.logicalWidth || image.width),
+        height = Math.min(SIZE - y, image.logicalHeight || image.height);
+      if (state.textEditor !== editor) return false;
+      save();
+      state.userRevision++;
+      blitSized(image, x, y, width, height);
+      mergeDirty(x, y, 0);
+      mergeDirty(x + width, y + height, 0);
+      state.autoEligible = true;
+      state.textEditor = null;
+      textEditor.hidden = true;
+      textEditor.setAttribute("aria-hidden", "true");
+      textEditorInput.value = "";
+      save();
+      render();
+      if (!isAssessmentMode()) schedule();
+      setStatusKey("textPlaced");
+      return true;
+    } finally {
+      if (state.textEditor === editor) {
+        editor.committing = false;
+        textEditor.querySelectorAll("button, textarea").forEach((control) => (control.disabled = false));
+      }
+    }
   }
   function mergeDirty(x, y, p = 10) {
     const a = {
@@ -1413,14 +1565,14 @@
     return replacementId;
   }
   function launchAutomaticAI(reason) {
-    if (!state.auto || !state.dirty || !state.autoEligible || state.drawing) return;
+    if (isAssessmentMode() || !state.auto || !state.dirty || !state.autoEligible || state.drawing) return;
     const replacementId=supersedeActiveAI(reason);
     requestAI("auto", replacementId);
   }
   function schedule(delay = state.autoDelayMs) {
     clearTimeout(state.timer);
     state.timer = 0;
-    if (!state.auto || !state.dirty || !state.autoEligible) return;
+    if (isAssessmentMode() || !state.auto || !state.dirty || !state.autoEligible) return;
     state.timer = setTimeout(() => {
       state.timer = 0;
       launchAutomaticAI("new-stroke-deadline");
@@ -3286,6 +3438,10 @@
       setNavigating(true);
       return;
     }
+    if (state.textEditor) {
+      void commitTextEditor();
+      return;
+    }
     if (state.pending) {
       if (state.pending.fading) {
         if (e.pointerType === "touch") {
@@ -3314,6 +3470,10 @@
         };
         return;
       }
+    }
+    if (state.mode === "text" && e.pointerType !== "touch") {
+      openTextEditor(clientPoint(e));
+      return;
     }
     if (state.mode === "select" && e.pointerType !== "touch") {
       if (state.pending) {
@@ -3488,15 +3648,50 @@
   document.querySelectorAll("[data-mode]").forEach(
     (b) =>
       (b.onclick = () => {
+        if (state.textEditor && b.dataset.mode !== "text") void commitTextEditor();
         if (state.mode === "select" && b.dataset.mode !== "select" && state.selection) commitSelection();
         state.mode = b.dataset.mode;
         document.querySelectorAll("[data-mode]").forEach((x) => x.classList.toggle("active", x === b));
-        setCanvasCursor("crosshair");
+        updateToolSizeControl();
+        setCanvasCursor(state.mode === "text" ? "text" : "crosshair");
       }),
   );
-  document.querySelector("#penSize").oninput = (e) => {
-    state.pen = +e.target.value;
-    document.querySelector("#penSizeValue").textContent = `${state.pen} px`;
+  textEditor.querySelectorAll("[data-text-kind]").forEach((button) => {
+    button.onclick = () => {
+      if (!state.textEditor || state.textEditor.committing) return;
+      state.textEditor.kind = button.dataset.textKind;
+      updateTextEditorUi();
+      textEditorInput.focus();
+    };
+  });
+  document.querySelector("#textEditorCommit").onclick = () => void commitTextEditor();
+  document.querySelector("#textEditorCancel").onclick = cancelTextEditor;
+  textEditorInput.addEventListener("compositionstart", () => {
+    if (state.textEditor) state.textEditor.composing = true;
+  });
+  textEditorInput.addEventListener("compositionend", () => {
+    if (state.textEditor) state.textEditor.composing = false;
+  });
+  textEditorInput.addEventListener("keydown", (event) => {
+    if (!state.textEditor || state.textEditor.composing || event.isComposing) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      cancelTextEditor();
+      return;
+    }
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      void commitTextEditor();
+    }
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!state.textEditor || textEditor.contains(event.target) || screen.contains(event.target)) return;
+    void commitTextEditor();
+  });
+  document.querySelector("#toolSize").oninput = (e) => {
+    const settings = state.mode === "eraser" ? TOOL_SIZE.eraser : TOOL_SIZE.pen;
+    state[settings.stateKey] = +e.target.value;
+    document.querySelector("#toolSizeValue").textContent = `${state[settings.stateKey]} px`;
   };
   document.querySelector("#aiFont").onchange = (e) => {
     state.aiFont = e.target.value;
@@ -3764,8 +3959,9 @@
     if (e.key === "Alt" && !state.drawing && !state.pending) setCanvasCursor("grab");
   });
   window.addEventListener("keyup", (e) => {
-    if (e.key === "Alt" && !state.panGesture && !state.drawing && !state.pending) setCanvasCursor("crosshair");
+    if (e.key === "Alt" && !state.panGesture && !state.drawing && !state.pending) setCanvasCursor(state.mode === "text" ? "text" : "crosshair");
   });
+  window.addEventListener("socrates-assessment-mode", suppressAssessmentAI);
   new ResizeObserver(fit).observe(view);
   document.querySelectorAll(".radial-action").forEach((button) => button.setAttribute("tabindex", "-1"));
   applyLanguage();

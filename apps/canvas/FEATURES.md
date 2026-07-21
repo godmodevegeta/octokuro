@@ -32,6 +32,15 @@ Canvas has two mutually exclusive modes.
 ## Input, navigation, and editing
 
 - Pen mode accepts stylus and mouse input.
+- Text mode lets users click a Canvas location and type directly into the workspace.
+- The text editor supports wrapped plain text and LaTeX input.
+- Plain text uses the current ink color and the existing Canvas text rasterizer.
+- LaTeX uses the existing MathJax rendering path and falls back to readable text when MathJax cannot render it.
+- Ctrl or Cmd plus Enter commits non-empty text, while Escape cancels the editor.
+- Shift plus Enter inserts a new line in plain-text mode.
+- Clicking outside the editor commits non-empty text and dismisses an empty editor.
+- Text-editor keyboard handling respects IME composition so an Enter key used to compose characters does not commit prematurely.
+- Committed typed text becomes confirmed sparse-tile content, so it participates in undo, redo, lasso editing, local snapshots, and atlas capture.
 - Stylus pressure changes pen width within the configured pen-width bounds.
 - The pen-size control ranges from 2 to 16 CSS pixels and defaults to 4 pixels.
 - Eraser mode removes confirmed pixels and uses a larger fixed eraser width.
@@ -68,6 +77,7 @@ Canvas has two mutually exclusive modes.
 - Auto AI waits after a completed pen stroke before requesting recognition.
 - The delay is configurable from 0 to 10 seconds in 0.1-second increments and persists locally.
 - Turning Auto AI off switches the normal workspace to manual AI actions.
+- Committing typed text or LaTeX marks its logical bounds as new user input and uses the same Auto AI delay as pen input.
 - The AI orb opens a radial menu through click, hover, or a drag gesture.
 - The radial menu exposes Answer, Hint, Continue, Explain, and Plot actions.
 - A manual action captures the current relevant canvas state rather than requiring a text chat box.
@@ -128,6 +138,7 @@ Canvas has two mutually exclusive modes.
 - An explanation panel appears when the target allows or requires written explanation evidence.
 - The explanation label identifies whether the written explanation is optional or required.
 - Assessment mode records pointer-down events in browser memory and saves a bounded copy of the latest 1,000 events in browser local storage.
+- Assessment mode permits native typed text and LaTeX as student-authored Canvas evidence.
 - Assessment mode derives edit entropy, erase ratio, pause count, spatial progression, diagram-before-equations, representation-before-equations, diagram-started, and calculations-started features.
 - Assessment mode captures the rendered Canvas surface as a PNG atlas when it saves evidence.
 - Assessment mode sends an atlas, the written explanation, sanitized features, submitted state, and a fresh idempotency key to the Assessment API.
@@ -138,6 +149,7 @@ Canvas has two mutually exclusive modes.
 - Authentication, authorization, unavailable-session, and service-connectivity failures show an appropriate recovery message.
 - The recovery action returns the student to the local student dashboard.
 - Auto AI, the AI orb, the radial AI menu, and every manual AI action are hidden and disabled only in assessment mode.
+- Assessment-mode activation cancels pending AI work and suppresses both automatic and manual AI requests at the Canvas runtime layer.
 - Assessment mode does not remove normal workspace features outside an assigned diagnostic.
 
 ## Privacy and durable evidence boundaries
