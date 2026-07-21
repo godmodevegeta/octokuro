@@ -51,6 +51,23 @@ The durable assessment request contains only the rendered work atlas, an optiona
 
 For a deeper look at Canvas architecture and its AI execution paths, read the [Canvas README](apps/canvas/README.md) and [architecture notes](apps/canvas/docs/architecture.md).
 
+## How we used Codex and GPT-5.6
+
+Codex and GPT-5.6 were both part of the development workflow and the product itself.
+During development, we used them as engineering collaborators to prototype and refine the Canvas, assessment workflow, dashboard, model boundaries, and automated tests.
+That accelerated iteration across browser interaction design, Node.js services, structured model output, and the security and privacy details required for a supervised learning pilot.
+
+At runtime, Codex CLI generates and critiques focused Mechanics diagnostic items, then evaluates submitted visual evidence against the declared assessment criteria.
+Its responses are schema-validated before use, and the API falls back to curated diagnostic content and conservative evaluation when Codex is unavailable.
+
+GPT-5.6 is the default configured model for Canvas API mode.
+Canvas sends GPT-5.6 a bounded visual atlas of the relevant handwriting, equations, diagrams, and recent work along with spatial metadata.
+The model returns strict structured commands for editable text, LaTeX, plots, diagrams, and hints that appear as provisional drafts beside the student's work.
+Students can move, resize, accept, or discard those drafts, while assessment mode disables AI assistance so submitted work remains the student's own.
+
+Canvas can also route the same visual-context workflow through a locally authenticated Codex CLI session.
+See the [Canvas README](apps/canvas/README.md#quick-start) for GPT-5.6 model configuration, supported variants, and Codex CLI setup.
+
 ## Quick start
 
 ### Prerequisites
